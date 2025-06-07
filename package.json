@@ -1,0 +1,14 @@
+{
+  "name": "pipi-toilet-radar-backend",
+  "version": "1.0.0",
+  "description": "皮皮廁所雷達後端API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "18.x"
+  }
+}
