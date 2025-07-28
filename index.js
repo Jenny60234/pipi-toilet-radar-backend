@@ -5,6 +5,14 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// 調試環境變數
+console.log('🔍 調試環境變數:');
+console.log('CHANNEL_ACCESS_TOKEN:', process.env.CHANNEL_ACCESS_TOKEN ? '✅ 存在' : '❌ 不存在');
+console.log('CHANNEL_SECRET:', process.env.CHANNEL_SECRET ? '✅ 存在' : '❌ 不存在');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ 存在' : '❌ 不存在');
+console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 // LINE Bot設定
 const config = {
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
