@@ -13,18 +13,16 @@ console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ 存在' : '❌ 不存
 console.log('PORT:', process.env.PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
-// 臨時硬編碼測試
+// LINE Bot設定 (臨時硬編碼)
 const config = {
-  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN || 'JN2ttzGlu+Z21EVXyJImNcti+I3QUgFEbsZs9RbLdFlpTy9BRWR5ZGYhrSQ6zQust5M46BPIJ49GsisRz2ZtsZHFWVS4uiKt228nhrRINpbogU2F6uCCbyx4RBSNpLKz5K/7K7WYTWRsy8RtKU1SzwdB04t89/10/w1cDnyilFU=',
-  channelSecret: process.env.CHANNEL_SECRET || '03427c71d01d38e575c143df3e2c7a8',
+  channelAccessToken: 'JN2ttzGlu+Z21EVXyJImNcti+I3QUgFEbsZs9RbLdFlpTy9BRWR5ZGYhrSQ6zQust5M46BPIJ49GsisRz2ZtsZHFWVS4uiKt228nhrRINpbogU2F6uCCbyx4RBSNpLKz5K/7K7WYTWRsy8RtKU1SzwdB04t89/10/w1cDnyilFU=',
+  channelSecret: '03427c71d01d38e575c143df3e2c7a8',
 };
 
 const client = new line.Client(config);
 
-// MongoDB連接
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/toilet-radar')
-  .then(() => console.log('🍃 MongoDB連接成功！'))
-  .catch(err => console.error('❌ MongoDB連接失敗：', err));
+// MongoDB連接 (臨時硬編碼)
+mongoose.connect('mongodb+srv://dssh30906:0Zb2JSUrEFbN5SIH@toilet-radar.natezpn.mongodb.net/toilet-radar?retryWrites=true&w=majority&appName=toilet-radar')
 
 // 用戶資料模型
 const UserSchema = new mongoose.Schema({
