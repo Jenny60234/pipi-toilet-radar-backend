@@ -1,19 +1,13 @@
-// 廁所雷達LINE Bot - 完整程式碼
+// 廁所雷達LINE Bot - 完整修復版本
+console.log('🚀 程式啟動中...');
+
 const express = require('express');
 const line = require('@line/bot-sdk');
 const mongoose = require('mongoose');
 
 const app = express();
 
-// 調試環境變數
-console.log('🔍 調試環境變數:');
-console.log('CHANNEL_ACCESS_TOKEN:', process.env.CHANNEL_ACCESS_TOKEN ? '✅ 存在' : '❌ 不存在');
-console.log('CHANNEL_SECRET:', process.env.CHANNEL_SECRET ? '✅ 存在' : '❌ 不存在');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? '✅ 存在' : '❌ 不存在');
-console.log('PORT:', process.env.PORT);
-console.log('NODE_ENV:', process.env.NODE_ENV);
-
-// LINE Bot設定 (臨時硬編碼)
+// LINE Bot設定 (硬編碼修復)
 const config = {
   channelAccessToken: 'JN2ttzGlu+Z21EVXyJImNcti+I3QUgFEbsZs9RbLdFlpTy9BRWR5ZGYhrSQ6zQust5M46BPIJ49GsisRz2ZtsZHFWVS4uiKt228nhrRINpbogU2F6uCCbyx4RBSNpLKz5K/7K7WYTWRsy8RtKU1SzwdB04t89/10/w1cDnyilFU=',
   channelSecret: '03427c71d01d38e575c143df3e2c7a8',
@@ -21,8 +15,10 @@ const config = {
 
 const client = new line.Client(config);
 
-// MongoDB連接 (臨時硬編碼)
+// MongoDB連接 (硬編碼修復)
 mongoose.connect('mongodb+srv://dssh30906:0Zb2JSUrEFbN5SIH@toilet-radar.natezpn.mongodb.net/toilet-radar?retryWrites=true&w=majority&appName=toilet-radar')
+  .then(() => console.log('🍃 MongoDB連接成功！'))
+  .catch(err => console.error('❌ MongoDB連接失敗：', err));
 
 // 用戶資料模型
 const UserSchema = new mongoose.Schema({
@@ -410,7 +406,6 @@ app.listen(port, async () => {
   
   // 初始化測試資料
   await initializeTestData();
-  // Fixed dotenv issue for Railway deployment
 });
 
 module.exports = app;
