@@ -1,11 +1,11 @@
 {
   "name": "pipi-toilet-radar-backend",
-  "version": "1.0.0", 
-  "description": "皮皮廁所雷達後端API",
-  "main": "app.js",
+  "version": "1.0.0",
+  "description": "皮皮廁所雷達後端API - 你的創業第一步！",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "@line/bot-sdk": "^7.5.2",
@@ -15,7 +15,24 @@
     "dotenv": "^16.3.1",
     "cors": "^2.8.5"
   },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
   "engines": {
     "node": "18.x"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jenny60234/pipi-toilet-radar-backend.git"
+  },
+  "keywords": [
+    "line-bot",
+    "toilet",
+    "radar",
+    "game",
+    "location",
+    "taiwan"
+  ],
+  "author": "Jenny",
+  "license": "MIT"
 }
