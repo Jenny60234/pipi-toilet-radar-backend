@@ -2,7 +2,6 @@
 const express = require('express');
 const line = require('@line/bot-sdk');
 const mongoose = require('mongoose');
-require('dotenv').config();
 
 const app = express();
 
@@ -405,6 +404,7 @@ app.listen(port, async () => {
   
   // 初始化測試資料
   await initializeTestData();
+  // Fixed dotenv issue for Railway deployment
 });
 
 module.exports = app;
