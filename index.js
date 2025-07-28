@@ -1,5 +1,5 @@
-// 廁所雷達LINE Bot - 完整修復版本
-console.log('🚀 程式啟動中...');
+// 廁所雷達LINE Bot - Railway部署版本
+console.log('🚀 廁所雷達啟動中...');
 
 const express = require('express');
 const line = require('@line/bot-sdk');
@@ -7,18 +7,23 @@ const mongoose = require('mongoose');
 
 const app = express();
 
-// LINE Bot設定 (硬編碼修復)
+// LINE Bot設定 - 使用環境變數或硬編碼
 const config = {
-  channelAccessToken: 'JN2ttzGlu+Z21EVXyJImNcti+I3QUgFEbsZs9RbLdFlpTy9BRWR5ZGYhrSQ6zQust5M46BPIJ49GsisRz2ZtsZHFWVS4uiKt228nhrRINpbogU2F6uCCbyx4RBSNpLKz5K/7K7WYTWRsy8RtKU1SzwdB04t89/10/w1cDnyilFU=',
-  channelSecret: '03427c71d01d38e575c143df3e2c7a8',
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || 'JN2ttzGlu+Z21EVXyJImNcti+I3QUgFEbsZs9RbLdFlpTy9BRWR5ZGYhrSQ6zQust5M46BPIJ49GsisRz2ZtsZHFWVS4uiKt228nhrRINpbogU2F6uCCbyx4RBSNpLKz5K/7K7WYTWRsy8RtKU1SzwdB04t89/10/w1cDnyilFU=',
+  channelSecret: process.env.LINE_CHANNEL_SECRET || '03427c71d01d38e575c143df3e2c7a8'
 };
 
 const client = new line.Client(config);
 
-// MongoDB連接 (硬編碼修復)
-mongoose.connect('mongodb+srv://dssh30906:0Zb2JSUrEFbN5SIH@toilet-radar.natezpn.mongodb.net/toilet-radar?retryWrites=true&w=majority&appName=toilet-radar')
+// MongoDB連接 - 使用環境變數或硬編碼
+const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://dssh30906:0Zb2JSUrEFbN5SIH@toilet-radar.natezpn.mongodb.net/toilet-radar?retryWrites=true&w=majority&appName=toilet-radar';
+
+mongoose.connect(mongoUri)
   .then(() => console.log('🍃 MongoDB連接成功！'))
-  .catch(err => console.error('❌ MongoDB連接失敗：', err));
+  .catch(err => {
+    console.error('❌ MongoDB連接失敗：', err);
+    // 不要讓程式停止，繼續運行
+  });
 
 // 用戶資料模型
 const UserSchema = new mongoose.Schema({
@@ -98,37 +103,47 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// 獲取或創建用戶
+// 獲取或創建用戶 - 加入錯誤處理
 async function getOrCreateUser(lineUserId, displayName) {
-  let user = await User.findOne({ lineUserId });
-  
-  if (!user) {
-    user = new User({
-      lineUserId,
-      displayName,
-      gameProfile: {
-        level: 1,
-        experience: 0,
-        coins: 100,
-        totalCheckIns: 0,
-        class: 'explorer'
-      }
-    });
+  try {
+    let user = await User.findOne({ lineUserId });
+    
+    if (!user) {
+      user = new User({
+        lineUserId,
+        displayName,
+        gameProfile: {
+          level: 1,
+          experience: 0,
+          coins: 100,
+          totalCheckIns: 0,
+          class: 'explorer'
+        }
+      });
+      await user.save();
+      
+      // 發送歡迎訊息
+      const welcomeMessage = {
+        type: 'text',
+        text: `🎉 歡迎加入廁所雷達！\n\n你現在是探索者新手！\n🎁 新手禮包：\n🪙 衛生幣 x100\n⭐ Lv.1 探索者\n\n開始你的衛生戰士之旅吧！`
+      };
+      
+      await client.pushMessage(lineUserId, welcomeMessage);
+    }
+    
+    user.lastActive = new Date();
     await user.save();
     
-    // 發送歡迎訊息
-    const welcomeMessage = {
-      type: 'text',
-      text: `🎉 歡迎加入廁所雷達！\n\n你現在是探索者新手！\n🎁 新手禮包：\n🪙 衛生幣 x100\n⭐ Lv.1 探索者\n\n開始你的衛生戰士之旅吧！`
+    return user;
+  } catch (error) {
+    console.error('用戶處理錯誤:', error);
+    // 返回基本用戶資料
+    return {
+      lineUserId,
+      displayName,
+      gameProfile: { level: 1, experience: 0, coins: 100, totalCheckIns: 0, class: 'explorer' }
     };
-    
-    await client.pushMessage(lineUserId, welcomeMessage);
   }
-  
-  user.lastActive = new Date();
-  await user.save();
-  
-  return user;
 }
 
 // 尋找附近廁所
@@ -246,7 +261,7 @@ function createToiletCard(toilet) {
   };
 }
 
-// 處理LINE訊息
+// 處理LINE訊息 - 加強錯誤處理
 async function handleEvent(event) {
   if (event.type !== 'message' && event.type !== 'postback') {
     return Promise.resolve(null);
@@ -346,7 +361,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: '🚽 廁所雷達運行中！',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
@@ -355,7 +371,11 @@ app.get('/', (req, res) => {
   res.json({
     message: '🚽 廁所雷達 API',
     version: '1.0.0',
-    status: 'running'
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      webhook: '/webhook'
+    }
   });
 });
 
@@ -399,13 +419,25 @@ async function initializeTestData() {
   }
 } 
 
+// 重要：Railway需要這個PORT設定
 const port = process.env.PORT || 3000;
+
 app.listen(port, async () => {
   console.log(`🚽 廁所雷達LINE Bot正在運行在Port ${port}`);
   console.log(`🎮 你的創業之路開始了！`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   
-  // 初始化測試資料
-  await initializeTestData();
+  // 初始化測試資料 - 只在MongoDB連接成功時執行
+  if (mongoose.connection.readyState === 1) {
+    await initializeTestData();
+  }
+});
+
+// 優雅關閉
+process.on('SIGTERM', () => {
+  console.log('🛑 收到SIGTERM，正在關閉伺服器...');
+  mongoose.connection.close();
+  process.exit(0);
 });
 
 module.exports = app;
